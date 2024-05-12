@@ -1,14 +1,44 @@
 //TODO: has to be odered from big -> small freq
 #[derive(Debug, Clone)]
 pub struct HuffmanTree {
-    value: char,
+    pub(crate) value: char,
     frequency: u32,
     huffman_code: String,
-    left_node: Option<Box<HuffmanTree>>,
-    right_node: Option<Box<HuffmanTree>>,
+    pub(crate) left_node: Option<Box<HuffmanTree>>,
+    pub(crate) right_node: Option<Box<HuffmanTree>>,
 }
 
-impl HuffmanTree {
+impl HuffmanTree {  
+    pub fn is_leave(&self) -> bool {
+        if self.left_node.is_none() && self.right_node.is_none() {
+            return true; 
+        } 
+
+        false
+    }
+
+    pub fn get_code(&self, target: char) -> Option<String> {
+        if self.value == target {
+            // If the current node is the target character, return its Huffman code
+            Some(self.huffman_code.clone())
+        } else {
+            // Recursively search in the left and right subtrees
+            if let Some(ref left) = self.left_node {
+                if let Some(code) = left.get_code(target) {
+                    return Some(code);
+                }
+            }
+            if let Some(ref right) = self.right_node {
+                if let Some(code) = right.get_code(target) {
+                    return Some(code);
+                }
+            }
+            // If the character is not found in the subtree rooted at this node, return None
+            None
+        }
+    }
+
+
     pub fn build_tree(mut unique_chars: Vec<HuffmanTree>) -> HuffmanTree {
         while unique_chars.len() > 2 {
             // getting last two elements in ordered vec
@@ -73,6 +103,7 @@ impl HuffmanTree {
     pub fn print(tree: HuffmanTree) {
         // character    code-word
         println!("char\t freq \t codes\t\t ascii");
+        println!("--------------------------------------------");
         Self::print_recursive(&tree);
     }
 
@@ -84,21 +115,16 @@ impl HuffmanTree {
         if tree.value as u8 == 10 {
             println!(
                 "\'\\n\'\t {}\t {}\t\t {}",
-                tree.frequency, 
-                tree.huffman_code,
-                tree.value as u8,
-            );           
+                tree.frequency, tree.huffman_code, tree.value as u8,
+            );
         } else if tree.value != '\0' {
             // Print the current node
             // TODO: print '\n' instead of newline
             println!(
                 "{}\t {}\t {}\t\t {}",
-                tree.value, 
-                tree.frequency, 
-                tree.huffman_code,
-                tree.value as u8,
+                tree.value, tree.frequency, tree.huffman_code, tree.value as u8,
             );
-        }  
+        }
 
         if let Some(right) = &tree.right_node {
             Self::print_recursive(right);

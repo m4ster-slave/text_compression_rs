@@ -1,7 +1,6 @@
 use crate::*;
 
 pub fn read_file(file_name: &str) -> Vec<HuffmanTree> {
-    //Vec<u8>
     let contents = fs::read(file_name)
         .expect("Should have been able to read the file");
 
