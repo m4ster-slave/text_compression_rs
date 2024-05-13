@@ -100,7 +100,7 @@ impl HuffmanTree {
         }
     }
 
-    pub fn print(tree: HuffmanTree) {
+    pub fn print_codes(tree: HuffmanTree) {
         // character    code-word
         println!("char\t freq \t codes\t\t ascii");
         println!("--------------------------------------------");
@@ -112,14 +112,13 @@ impl HuffmanTree {
             Self::print_recursive(left);
         }
 
+        // if we encounter a newline character 
         if tree.value as u8 == 10 {
             println!(
                 "\'\\n\'\t {}\t {}\t\t {}",
                 tree.frequency, tree.huffman_code, tree.value as u8,
             );
         } else if tree.value != '\0' {
-            // Print the current node
-            // TODO: print '\n' instead of newline
             println!(
                 "{}\t {}\t {}\t\t {}",
                 tree.value, tree.frequency, tree.huffman_code, tree.value as u8,
