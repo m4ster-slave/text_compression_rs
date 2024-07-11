@@ -23,7 +23,6 @@ pub fn write_into_file_as_bits(filename: &str, string: String) {
     let mut byte_counter = 0;
     let mut byte_to_write: u8 = 0;
 
-    print!("\n\n\n");
     for value in string.as_bytes() {
         // creating a byte to write
         byte_to_write = match value {
@@ -39,11 +38,11 @@ pub fn write_into_file_as_bits(filename: &str, string: String) {
             byte_counter = 0;
         }
     }
-
     // Write any remaining bits
     if byte_counter > 0 {
         // Shift the byte to the right to align bits
         byte_to_write <<= 8 - byte_counter;
+        // print!("{:08b}", byte_to_write);
         let _ = file.write_all(&[byte_to_write]);
     }
 }

@@ -8,11 +8,11 @@ pub struct HuffmanTree {
     pub(crate) right_node: Option<Box<HuffmanTree>>,
 }
 
-impl HuffmanTree {  
+impl HuffmanTree {
     pub fn is_leave(&self) -> bool {
         if self.left_node.is_none() && self.right_node.is_none() {
-            return true; 
-        } 
+            return true;
+        }
 
         false
     }
@@ -20,7 +20,7 @@ impl HuffmanTree {
     pub fn get_code(&self, target: char) -> Option<String> {
         if self.value == target {
             // If the current node is the target character, return its Huffman code
-            Some(self.huffman_code.clone())
+            return Some(self.huffman_code.clone());
         } else {
             // Recursively search in the left and right subtrees
             if let Some(ref left) = self.left_node {
@@ -34,38 +34,62 @@ impl HuffmanTree {
                 }
             }
             // If the character is not found in the subtree rooted at this node, return None
-            None
+            return None;
         }
     }
 
+    // pub fn build_huffman_tree(mut unique_chars: Vec<HuffmanTree>) -> HuffmanTree {
+    //     while unique_chars.len() > 2 {
+    //         // getting last two elements in ordered vec
+    //         let left_node = unique_chars.pop().unwrap().clone();
+    //         let right_node = unique_chars.pop().unwrap().clone();
+    //
+    //         // create new node from leave nodes
+    //         let new_node = Self::add(left_node, right_node);
+    //
+    //         //insert the new node
+    //         for i in 0..unique_chars.len() {
+    //             if unique_chars[i].frequency < new_node.frequency {
+    //                 unique_chars.insert(i, new_node);
+    //                 break;
+    //             }
+    //         }
+    //     }
+    //
+    //     if unique_chars.len() == 2 {
+    //         let left_node = unique_chars[1].clone(); //always left node bc smaller
+    //         let right_node = unique_chars[0].clone();
+    //         return Self::add(left_node, right_node);
+    //     }
+    //
+    //     // return single root node
+    //     unique_chars[0].clone()
+    // }
 
-    pub fn build_tree(mut unique_chars: Vec<HuffmanTree>) -> HuffmanTree {
-        while unique_chars.len() > 2 {
-            // getting last two elements in ordered vec
-            let left_node = unique_chars.pop().unwrap().clone();
-            let right_node = unique_chars.pop().unwrap().clone();
+    pub fn build_huffman_tree(mut unique_chars: Vec<HuffmanTree>) -> HuffmanTree {
+        // Sort the vector by frequency in non-decreasing order
+        unique_chars.sort_by(|a, b| a.frequency.cmp(&b.frequency));
 
-            // create new node from leave nodes
+        while unique_chars.len() > 1 {
+            // Get the two nodes with the smallest frequencies
+            let left_node = unique_chars.remove(0);
+            let right_node = unique_chars.remove(0);
+
+            // Create a new node from the two nodes
             let new_node = Self::add(left_node, right_node);
 
-            //insert the new node
-            for i in 0..unique_chars.len() {
-                if unique_chars[i].frequency < new_node.frequency {
-                    unique_chars.insert(i, new_node);
-                    break;
-                }
-            }
+            // Find the correct position to insert the new node to maintain the sorted order
+            let pos = unique_chars
+                .binary_search_by(|node| node.frequency.cmp(&new_node.frequency))
+                .unwrap_or_else(|e| e);
+            unique_chars.insert(pos, new_node);
         }
 
-        if unique_chars.len() == 2 {
-            let left_node = unique_chars[1].clone(); //always left node bc smaller
-            let right_node = unique_chars[0].clone();
-            return Self::add(left_node, right_node);
-        }
-
-        unique_chars[0].clone()
+        // Return the single remaining node, which is the root of the Huffman tree
+        unique_chars.pop().unwrap()
     }
 
+    // recursive function to generate the huffman code
     pub fn generate_codes(tree: &mut HuffmanTree, codes: String) {
         if let Some(ref mut left) = tree.left_node {
             Self::generate_codes(left, format!("{}0", codes));
@@ -112,7 +136,7 @@ impl HuffmanTree {
             Self::print_recursive(left);
         }
 
-        // if we encounter a newline character 
+        // if we encounter a newline character
         if tree.value as u8 == 10 {
             println!(
                 "\'\\n\'\t {}\t {}\t\t {}",
@@ -146,10 +170,10 @@ mod tests {
             HuffmanTree::new_char('a', 5),
         ];
 
-        let mut huffman_tree = HuffmanTree::build_tree(freq_arr);
+        let mut huffman_tree = HuffmanTree::build_huffman_tree(freq_arr);
         HuffmanTree::generate_codes(&mut huffman_tree, String::new());
 
-        HuffmanTree::print(huffman_tree.clone());
+        HuffmanTree::print_codes(huffman_tree.clone());
 
         if let Some(left) = &huffman_tree.left_node {
             assert_eq!(left.huffman_code, String::from("0"));

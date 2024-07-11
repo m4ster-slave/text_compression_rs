@@ -1,11 +1,12 @@
 use crate::*;
 
-pub fn read_file_string(file_name: &str) -> Vec<HuffmanTree> {
+pub fn read_file_string_into_huffman_array(file_name: &str) -> Vec<HuffmanTree> {
     let contents = fs::read(file_name)
         .expect("Should have been able to read the file");
 
     let mut map: HashMap<u8, u32> = HashMap::new();
 
+    //count each character and input it into a hashmap as key/value pair
     for &value in &contents {
         if let Some(count) = map.get_mut(&value) {
             *count += 1
@@ -14,16 +15,25 @@ pub fn read_file_string(file_name: &str) -> Vec<HuffmanTree> {
         }
     }
 
-    //sort entries into vector
+    //sort entries from hashmap into vector TODO: input it directly into vector?
     let mut sorted_entries: Vec<_> = map.iter().collect();
     sorted_entries.sort_by(|a, b| b.1.cmp(a.1));
-    println!("entries: {:?}\n\n", sorted_entries);
+
+    for (&c, &f) in &sorted_entries {
+        if c == 10{
+            println!("character: {}, freq: {}", "\\n", f);
+        } else if c == 32{
+            println!("character: {}, freq: {}", "<space>", f);
+        } else{
+            println!("character: {}, freq: {}", c as char, f);
+        }
+    }
 
     let mut huffman_trees: Vec<HuffmanTree> = Vec::new();
 
-    // Iterate over the sorted vector
-    for (character, freq) in sorted_entries {
-        huffman_trees.push(HuffmanTree::new_char(*character as char, *freq));
+    // create huffman root nodes from sorted array
+    for (&character, &freq) in sorted_entries {
+        huffman_trees.push(HuffmanTree::new_char(character as char, freq));
     }
 
     huffman_trees
