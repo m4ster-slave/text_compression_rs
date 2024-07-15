@@ -54,3 +54,4 @@ fn create_new_file_name(filename: &str) -> String {
     };
     format!("{}.rhc", base_filename)
 }
+

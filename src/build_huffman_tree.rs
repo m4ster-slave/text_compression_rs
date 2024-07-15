@@ -1,3 +1,5 @@
+use std::u32;
+
 //TODO: has to be odered from big -> small freq
 #[derive(Debug, Clone)]
 pub struct HuffmanTree {
@@ -9,7 +11,58 @@ pub struct HuffmanTree {
 }
 
 impl HuffmanTree {
-    pub fn is_leave(&self) -> bool {
+    
+    pub fn sort_frequency_array(mut node_arr: Vec<HuffmanTree>) -> Vec<HuffmanTree> {
+        node_arr.sort_by(|a, b| {
+            a.frequency.cmp(&b.frequency)
+                .then_with(|| a.value.cmp(&b.value))
+        });
+
+        node_arr
+    }
+
+    // Helper function to convert a frequency to a binary string TODO: Do this with function templates
+    fn frequency_to_binary(frequency: u32) -> String {
+        format!("{:032b}", frequency)
+    }
+    fn char_to_binary(value: char) -> String {
+        format!("{:08b}", value as u8)
+    }
+
+    // Recursive function to traverse the Huffman tree and collect the encoded pairs
+    fn get_encoded_huffman_tree(&self, encoded_pairs: &mut String, total_characters: &mut u32) {
+        if self.is_leaf() {
+            // Convert frequency and value to binary and append to the result string
+            let binary_frequency = HuffmanTree::frequency_to_binary(self.frequency);
+            let binary_value = HuffmanTree::char_to_binary(self.value);
+            encoded_pairs.push_str(&format!("{}{}", binary_value, binary_frequency));
+            println!("{}\t{}", binary_value, binary_frequency);
+            *total_characters = *total_characters + 1;
+        } else {
+            // Recursively traverse the left and right subtrees
+            if let Some(ref left) = self.left_node {
+                left.get_encoded_huffman_tree(encoded_pairs, total_characters);
+            }
+            if let Some(ref right) = self.right_node {
+                right.get_encoded_huffman_tree(encoded_pairs, total_characters);
+            }
+        }
+    }
+
+    // Public function to start the traversal and get the encoded tree
+    pub fn get_encoded_tree(&self) -> String {
+        let mut encoded_pairs = String::new();
+        let mut total_characters: u32 = 0;
+        self.get_encoded_huffman_tree(&mut encoded_pairs, &mut total_characters);
+
+        // push in the number of leaf nodes in the beginnning of the tree
+        let total_characters_as_bin = HuffmanTree::frequency_to_binary(total_characters);
+        encoded_pairs = format!("{}{}", total_characters_as_bin, encoded_pairs);
+        
+        encoded_pairs
+    }
+
+    pub fn is_leaf(&self) -> bool {
         if self.left_node.is_none() && self.right_node.is_none() {
             return true;
         }
@@ -68,7 +121,6 @@ impl HuffmanTree {
 
     pub fn build_huffman_tree(mut unique_chars: Vec<HuffmanTree>) -> HuffmanTree {
         // Sort the vector by frequency in non-decreasing order
-        unique_chars.sort_by(|a, b| a.frequency.cmp(&b.frequency));
 
         while unique_chars.len() > 1 {
             // Get the two nodes with the smallest frequencies
